@@ -12,8 +12,11 @@ public class Particle {
 
 	double xForce = 0;
 	double yForce = 0;
-	
+
 	double kn, kt;
+
+	int id = 0;
+	private static int idPart = 0;
 
 	// Agrego todas las particulas que colisionaron en un cierto dt
 	List<Particle> particlesColided = new ArrayList<>();
@@ -23,6 +26,8 @@ public class Particle {
 		this.ry = ry;
 		this.radio = radio;
 		this.mass = mass;
+		id = idPart;
+		idPart++;
 	}
 
 	public Particle(double rx, double ry, double vx, double vy, double radio, double mass) {
@@ -60,16 +65,44 @@ public class Particle {
 
 	// TODO: Hacer que calculen las fuerzas normales y tangenciales, y pasarlas
 	// a vectores x e y
-	public boolean colide(Particle p) {
+	private boolean collision(Particle p) {
 		if (getSuperposition(p) >= 0) {
 			particlesColided.add(p);
 			double normal = calculateNormalForce(p, kn);
 			double tangencial = calculateTanForce(p, kt);
-			xForce += normal*Math.cos(getAngle(p)) + tangencial*Math.sin(getAngle(p));
-			yForce += normal*Math.sin(getAngle(p)) + tangencial*Math.cos(getAngle(p));
+			xForce += normal * Math.cos(getAngle(p)) + tangencial * Math.sin(getAngle(p));
+			yForce += normal * Math.sin(getAngle(p)) + tangencial * Math.cos(getAngle(p));
 			return true;
 		}
 		return false;
+	}
+
+	/*
+	 * bounds me dice en que posiciones estan los dos agujeritos para que las
+	 * pelotitas salgan escapadas. Si colisiono con una pared, la fuerza cambia
+	 * de sentido
+	 */
+	private boolean collisionWall(double W, double L, double D) {
+		boolean state = false;
+		if (this.rx - radio == 0 || this.rx + radio == L) {
+			xForce = -1 * xForce;
+			state = true;
+		}
+
+		double posY = this.ry + radio;
+		double bound1 = (W - D) / 2;
+		double bound2 = (W + D) / 2;
+		if ((posY >= 0 && posY <= bound1) || (posY >= bound2 && posY <= W)) {
+			yForce = -1 * yForce;
+			state = true;
+		}
+		return state;
+	}
+
+	public boolean collision(double W, double L, double D, Particle p) {
+		boolean cParticle = collision(p);
+		boolean cWall = collisionWall(W, L, D);
+		return cParticle || cWall;
 	}
 
 	public double getSuperposition(Particle p) {
@@ -82,6 +115,15 @@ public class Particle {
 
 	private double calculateTanForce(Particle p, double kt) {
 		return -kt * getSuperposition(p) * getRelVelocity(p);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Particle))
+			return false;
+
+		Particle p = (Particle) obj;
+		return this.id == p.id;
 	}
 
 }
