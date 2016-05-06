@@ -8,7 +8,7 @@ public class Storage {
 	private double W;
 	private double L;
 	private double D;
-	private double friccion;
+	static double friccion;
 
 	List<Particle> particles = null;
 
@@ -16,7 +16,7 @@ public class Storage {
 		this.W = W;
 		this.L = L;
 		this.D = D;
-		this.friccion = friccion;
+		Storage.friccion = friccion;
 	}
 
 	public Storage(double W, double L, double D) {
@@ -33,14 +33,6 @@ public class Storage {
 
 	public double getW() {
 		return W;
-	}
-
-	public double getFriccion() {
-		return friccion;
-	}
-
-	public void setFriccion(double friccion) {
-		this.friccion = friccion;
 	}
 
 	public void addParticles(List<Particle> particles) {

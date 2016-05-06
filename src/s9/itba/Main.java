@@ -4,6 +4,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		Storage s = new Storage(10, 20, 5);
+		Storage.friccion = 0.95;
 		generateParticles(s);
 	}
 
