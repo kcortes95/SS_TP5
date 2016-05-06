@@ -63,8 +63,6 @@ public class Particle {
 		return Math.atan2(p.ry - this.ry, p.rx - this.rx);
 	}
 
-	// TODO: Hacer que calculen las fuerzas normales y tangenciales, y pasarlas
-	// a vectores x e y
 	private boolean collision(Particle p) {
 		if (getSuperposition(p) >= 0) {
 			particlesColided.add(p);
@@ -78,8 +76,7 @@ public class Particle {
 	}
 
 	/*
-	 * bounds me dice en que posiciones estan los dos agujeritos para que las
-	 * pelotitas salgan escapadas. Si colisiono con una pared, la fuerza cambia
+	 * Si colisiono con una pared, la fuerza cambia
 	 * de sentido
 	 */
 	private boolean collisionWall(double W, double L, double D) {
