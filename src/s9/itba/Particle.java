@@ -7,6 +7,7 @@ import java.util.*;
 
 public class Particle {
 
+
 	
 	
 	public Particle previous, next;
@@ -149,6 +150,7 @@ public class Particle {
 	 */
 	private boolean collisionWall(double W, double L, double D) {
 		boolean state = false;
+
 		if (this.rx - r == 0 || this.rx + r == L) {
 			f.y += f.x*Math.signum(f.x)*0.1; //////(CAMBIAR EL MU)
 			f.x = 0;
@@ -156,6 +158,7 @@ public class Particle {
 		}
 
 		double posY = this.ry + r;
+
 		double bound1 = (W - D) / 2;
 		double bound2 = (W + D) / 2;
 		if ((posY >= 0 && posY <= bound1) || (posY >= bound2 && posY <= W)) {
@@ -173,7 +176,7 @@ public class Particle {
 	}
 
 	public double getSuperposition(Particle p) {
-		return this.r + p.r - Math.abs(p.r - this.r);
+		return this.r + p.r - Math.sqrt(Math.pow(this.rx-p.rx,2)+Math.pow(this.ry-p.ry, 2));
 	}
 
 	private double calculateNormalForce(Particle p, double kn) {
@@ -183,6 +186,8 @@ public class Particle {
 	private double calculateTanForce(Particle p, double kt) {
 		return -kt * getSuperposition(p) * getRelVelocity(p);
 	}
+	
+	
 
 	
 
