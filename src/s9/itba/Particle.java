@@ -7,7 +7,7 @@ public class Particle {
 	double rx, ry;
 	double vx, vy;
 	double ax, ay;
-	double radio;
+	double radius;
 	double mass;
 
 	double xForce = 0;
@@ -21,10 +21,10 @@ public class Particle {
 	// Agrego todas las particulas que colisionaron en un cierto dt
 	List<Particle> particlesColided = new ArrayList<>();
 
-	public Particle(double rx, double ry, double radio, double mass) {
+	public Particle(double rx, double ry, double radius, double mass) {
 		this.rx = rx;
 		this.ry = ry;
-		this.radio = radio;
+		this.radius = radius;
 		this.mass = mass;
 		id = idPart;
 		idPart++;
@@ -81,12 +81,12 @@ public class Particle {
 	 */
 	private boolean collisionWall(double W, double L, double D) {
 		boolean state = false;
-		if (this.rx - radio == 0 || this.rx + radio == L) {
+		if (this.rx - radius == 0 || this.rx + radius == L) {
 			xForce = -1 * xForce;
 			state = true;
 		}
 
-		double posY = this.ry + radio;
+		double posY = this.ry + radius;
 		double bound1 = (W - D) / 2;
 		double bound2 = (W + D) / 2;
 		if ((posY >= 0 && posY <= bound1) || (posY >= bound2 && posY <= W)) {
@@ -103,7 +103,7 @@ public class Particle {
 	}
 
 	public double getSuperposition(Particle p) {
-		return this.radio + p.radio - Math.abs(p.radio - this.radio);
+		return this.radius + p.radius - Math.sqrt(Math.pow(this.rx-p.rx,2)+Math.pow(this.ry-p.ry, 2));
 	}
 
 	private double calculateNormalForce(Particle p, double kn) {
@@ -112,6 +112,10 @@ public class Particle {
 
 	private double calculateTanForce(Particle p, double kt) {
 		return -kt * getSuperposition(p) * getRelVelocity(p);
+	}
+	
+	public int hashCode(){
+		return id;
 	}
 
 	@Override

@@ -2,6 +2,8 @@ package s9.itba;
 
 public class Simulation {
 
+	public static final double mass = 0.01;
+	
 	double dt = 0;
 	double max = 0;
 	double step = 0;
@@ -17,13 +19,11 @@ public class Simulation {
 	}
 
 	public void run() {
-		generateParticles(s);
-
 		/*
 		 * Esto esta modelado con la fuerza bruta... Obviamente hay que
 		 * implementar el Cell Index Method para calcular cuales son los vecinos
 		 */
-		while (step <= max) {
+		/*while (step <= max) {
 			for (Particle p1 : s.particles) {
 				for (Particle p2 : s.particles) {
 					if (!p1.equals(p1)) {
@@ -35,17 +35,7 @@ public class Simulation {
 				p1.vy = p1.vy + p1.yForce * dt / p1.mass;
 			}
 			step += dt;
-		}
-	}
-
-	private static void generateParticles(Storage s) {
-		double radio = s.getD() / 10;
-		for (double l = 1; l <= s.maxParticlesY(); l++) {
-			for (double w = 1; w <= s.maxParticlesX(); w++) {
-				Particle p = new Particle((2 * w - 1) * radio, (2 * l - 1) * radio, radio, radio);
-				s.addParticle(p);
-			}
-		}
+		}*/
 	}
 
 }
