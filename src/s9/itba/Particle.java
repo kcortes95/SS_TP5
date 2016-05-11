@@ -2,6 +2,7 @@ package s9.itba;
 
 import java.util.*;
 
+
 public class Particle {
 
 	double rx, ry;
@@ -82,7 +83,8 @@ public class Particle {
 	private boolean collisionWall(double W, double L, double D) {
 		boolean state = false;
 		if (this.rx - radio == 0 || this.rx + radio == L) {
-			xForce = -1 * xForce;
+			yForce += xForce*Math.signum(xForce)*0.1; //////(CAMBIAR EL MU)
+			xForce = 0;
 			state = true;
 		}
 
@@ -90,7 +92,7 @@ public class Particle {
 		double bound1 = (W - D) / 2;
 		double bound2 = (W + D) / 2;
 		if ((posY >= 0 && posY <= bound1) || (posY >= bound2 && posY <= W)) {
-			yForce = -1 * yForce;
+			yForce = 0;
 			state = true;
 		}
 		return state;
@@ -122,5 +124,6 @@ public class Particle {
 		Particle p = (Particle) obj;
 		return this.id == p.id;
 	}
+
 
 }
