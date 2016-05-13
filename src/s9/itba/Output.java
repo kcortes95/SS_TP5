@@ -25,16 +25,16 @@ public class Output {
 			}
 		}
 		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.xyz", true)))) {
-			out.write((particles.size()) + "\n");
+			out.write((particles.size()+4) + "\n");
 			//comment line
 			//System.out.println("Frame : " + count++);
 			out.write("Comment line\n");
-			//out.write(100000 + "\t" + -limit + "\t" + -limit + "\t" + 10 + "\t0\t0\t0" + "\n");
-			//out.write(100001 + "\t" + -limit + "\t" + limit + "\t" + 10 + "\t0\t0\t0" + "\n");
-			//out.write(100002 + "\t" + limit + "\t" + -limit + "\t" + 10 + "\t0\t0\t0" + "\n");
-			//out.write(100004+ "\t" + limit + "\t" + limit + "\t" + 10 + "\t0\t0\t0" + "\n");
+			out.write(100000 + "\t" + -5 + "\t" + -5 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
+			out.write(100001 + "\t" + -5 + "\t" + 25 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
+			out.write(100002 + "\t" + 15 + "\t" + -5 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
+			out.write(100004+ "\t" + 15 + "\t" + 25 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
 			for(Particle p: particles)
-				out.write(p.ID + "\t" + p.rx + "\t" + p.ry + "\t" + p.r + "\t" + (p.r<5?"255":"0") + "\t" + (p.r<5?"255":"255") + "\t" + (p.r<5?"255":"255")  + "\n");
+				out.write(p.ID + "\t" + p.rx + "\t" + p.ry + "\t" + p.r + "\t" + ((p.ID*10)%256) + "\t" + ((p.ID*20)%256) + "\t" + ((p.ID*30)%256)  + "\n");
 			//out.write(time + "\t " + p.rx + "\n");
 			out.close();
 		}catch (IOException e) {

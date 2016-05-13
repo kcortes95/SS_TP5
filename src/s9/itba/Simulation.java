@@ -95,13 +95,13 @@ public class Simulation {
 	}
 	
 	private void updatePos(Particle p, double dt){
-		double M = grid.getM();
+		/*double M = grid.getM();
 		double cellLength = grid.getL()/grid.getM();
 		int cellX = (int) Math.floor(p.rx/cellLength);
-		int cellY = (int) Math.floor(p.ry/cellLength);
+		int cellY = (int) Math.floor(p.ry/cellLength);*/
 		beeman(p, dt);
 		// If its in the silo update the cells
-		if(cellX>0 && cellX<=M && cellY>0 && cellY<=M){
+		/*if(cellX>0 && cellX<=M && cellY>0 && cellY<=M){
 			int newCellX = (int)Math.floor(p.rx/cellLength);
 			int newCellY = (int)Math.floor(p.ry/cellLength);
 			if(newCellX != cellX ||newCellY != cellY){
@@ -113,7 +113,7 @@ public class Simulation {
 				grid.getCell(cellX, cellY).getParticles().remove(p);
 				grid.insert(p);
 			}
-		}
+		}*/
 	}
 	
 	private Vector eulerPos(Particle part, double dt){

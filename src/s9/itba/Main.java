@@ -3,8 +3,8 @@ package s9.itba;
 public class Main {
 
 	public static void main(String[] args) {
-		double dt = 0.01;
-		double dt2 = 0.1;
+		double dt = 0.0001;
+		double dt2 = 0.01;
 
 		Storage s = new Storage(10, 20, 5);
 		s.generateRandomParticles(2);

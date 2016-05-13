@@ -26,10 +26,14 @@ public class Storage {
 	
 	public void generateRandomParticles(double time){
 		double start = System.currentTimeMillis();
+		int n=0;
 		while(System.currentTimeMillis()-start<time*1000){
+		//while (n<25){
 			Particle p = generateRandomPos();
-			if(isValidPos(p))
+			if(isValidPos(p)){
 				particles.add(p);
+				n++;
+			}
 		}
 	}
 	

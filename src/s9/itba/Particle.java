@@ -8,7 +8,8 @@ import java.util.*;
 public class Particle {
 
 
-	
+	public static final double kn = Math.pow(10,5);
+	public static final double kt = 2*kn;
 	
 	public Particle previous, next;
     static int counter = 1;
@@ -21,7 +22,7 @@ public class Particle {
     private Color c;     
     public int ID;
     public boolean checked = false;
-    public double kn, kt;
+    
 
     public Particle(double rx, double ry, double vx, double vy, double ax, double ay, double radius, double mass, Color color) {
         this.vx = vx;
@@ -142,9 +143,17 @@ public class Particle {
 			double nForce = calculateNormalForce(p, kn);
 			double tForce = calculateTanForce(p, kt);
 			Vector nVersor = getNormalVersor(p);
+			/*try{
+				System.out.println(nForce);
+				Thread.sleep(500);
+			}catch(Exception e){};*/
 			Vector tVersor = getTanVersor(p);
-			f.x += nForce * nVersor.x * -1 + tForce * tVersor.x;
-			f.y += nForce * nVersor.y * -1 + tForce * tVersor.y;
+			/*System.out.println("nForce: " + nForce);
+			System.out.println("tForce: " + tForce);
+			System.out.println("F antes: " + f.x + ", " + f.y);*/
+			f.x += nForce * nVersor.x + tForce * tVersor.x;
+			f.y += nForce * nVersor.y + tForce * tVersor.y;
+			//System.out.println("F desp: " + f.x + ", " + f.y);
 		}
 	}
 
