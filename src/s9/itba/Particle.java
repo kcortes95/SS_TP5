@@ -105,8 +105,23 @@ public class Particle {
 		return 1 - Math.exp((-4 * friction * ry) / D);
 	}
 
-	public double getRelVelocity(Particle p) {
-		return p.getSpeed() - this.getSpeed();
+	public Vector getNormalVersor(Particle p){
+		Vector relDist = new Vector(p.rx-this.rx,p.ry-this.ry);
+		relDist.x /= getDistance(p);
+		relDist.y /= getDistance(p);
+		return relDist;
+	}
+	
+	public Vector getTanVersor(Particle p) {
+		Vector relDist = new Vector(p.rx-this.rx,p.ry-this.ry);
+		relDist.x /= getDistance(p);
+		relDist.y /= getDistance(p);
+		return new Vector(-relDist.y,relDist.x);
+	}
+	
+	public double getTanVel(Particle p){
+		Vector tVersor = getTanVersor(p);
+		return Math.sqrt(Math.pow(this.vx*tVersor.x,2)+Math.pow(this.vy*tVersor.y,2));
 	}
 	
 	public Vector getRelPos(Particle other){
@@ -122,41 +137,33 @@ public class Particle {
 		return Math.atan2(p.ry - this.ry, p.rx - this.rx);
 	}
 
-	public boolean collision(Particle p) {
+	public void collision(Particle p) {
 		if (getSuperposition(p) >= 0) {
-			double normal = calculateNormalForce(p, kn);
-			double tangencial = calculateTanForce(p, kt);
-			f.x += normal * Math.cos(getAngle(p)) + tangencial * Math.sin(getAngle(p));
-			f.y += normal * Math.sin(getAngle(p)) + tangencial * Math.cos(getAngle(p));
-			return true;
+			double nForce = calculateNormalForce(p, kn);
+			double tForce = calculateTanForce(p, kt);
+			Vector nVersor = getNormalVersor(p);
+			Vector tVersor = getTanVersor(p);
+			f.x += nForce * nVersor.x * -1 + tForce * tVersor.x;
+			f.y += nForce * nVersor.y * -1 + tForce * tVersor.y;
 		}
-		return false;
 	}
 
-	public boolean collisionWall(double W, double L, double D) {
-		boolean state = false;
-		/*if (this.rx - r <= 0 || this.rx + r >= L) {
-			f.y += f.x*Math.signum(f.x)*0.1; //////(CAMBIAR EL MU)
-			f.x = 0;
-			state = true;
+	public void collisionWall(double W, double L, double D) {
+		double limitPos=0, limitVPos;
+		if (this.rx - r <= 0){
+		 limitPos= this.rx-r;
+		}else if (this.rx + r >= W){
+			limitPos = this.rx+r;
 		}
-
-		double posY = this.ry + r;
-
-		double bound1 = (W - D) / 2;
-		double bound2 = (W + D) / 2;
-		if ((posY >= 0 && posY <= bound1) || (posY >= bound2 && posY <= W)) {
-			f.y = 0;
-			f.x -= f.y*0.1*Math.signum(f.x);
-			state = true;
-		}*/
-		double posY = this.ry - r;
-		if(posY<=0){
-			vy = 0;
-			f.y = 0;
-			ry=0+r;
+		if ( limitPos != 0){
+			this.f.x-= limitPos * 0.4;
 		}
-		return state;
+		
+		if (this.ry-r<=0){
+			limitVPos = this.ry-r;
+			this.f.y-= limitVPos * 0.4;//MODIFICAR CONSTANTE
+		}
+		
 	}
 
 	public double getSuperposition(Particle p) {
@@ -168,12 +175,6 @@ public class Particle {
 	}
 
 	private double calculateTanForce(Particle p, double kt) {
-		return -kt * getSuperposition(p) * getRelVelocity(p);
+		return -kt * getSuperposition(p) * getTanVel(p);
 	}
-	
-	
-
-	
-
-
 }

@@ -70,8 +70,13 @@ public class Simulation {
 	
 	private void getF(Particle p){
 		p.f = new Vector(0,-p.m * GRAVITY);
+		for(Particle p2: particles){
+			if(!p.equals(p2)){
+				p.collision(p2);
+			}
+		}
 		// It has left the silo
-		if(grid.getCell(p)!=null){
+		/*if(grid.getCell(p)!=null){
 			// Check own cell
 			for (Particle p2: grid.getCell(p).getParticles()){
 				if (!p.equals(p2)){
@@ -84,7 +89,7 @@ public class Simulation {
 					p.collision(p2);
 				}
 			}
-		}
+		}*/
 		// Check wall Collision
 		p.collisionWall(s.getW(), s.getL(), s.getD());
 	}
