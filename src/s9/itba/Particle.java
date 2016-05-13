@@ -3,114 +3,99 @@ package s9.itba;
 import java.awt.Color;
 import java.util.*;
 
-
-
 public class Particle {
 
-
-	
-	
 	public Particle previous, next;
-    static int counter = 1;
-    public Vector f;
-    public double rx, ry;    
-    public double vx, vy;
-    public double ax, ay;
-    public double r;    
-    public double m;   
-    private Color c;     
-    public int ID;
-    public boolean checked = false;
-    public double kn, kt;
+	public static final double mass = 0.01;
+	static int counter = 1;
+	public Vector f;
+	public double rx, ry;
+	public double vx, vy;
+	public double ax, ay;
+	public double r;
+	public double m;
+	private Color c;
+	public int ID;
+	public boolean checked = false;
+	public double kn, kt;
 
-    public Particle(double rx, double ry, double vx, double vy, double ax, double ay, double radius, double mass, Color color) {
-        this.vx = vx;
-        this.vy = vy;
-        this.ax = ax;
-        this.ay = ay;
-        this.rx = rx;
-        this.ry = ry;
-        this.r = radius;
-        this.m  = mass;
-        this.c  = color;
-        this.ID = counter++;
-    }
-    
-    public Particle(int ID, double rx, double ry, double vx, double vy, double radius, double mass){
-    	this(rx,ry,vx,vy,0,0,radius,mass,Color.red);
-    	this.ID = ID;
-    }
-    
-    public Particle(double r, double m,  Color c) {
-    	 rx = (Math.random() * (0.5-2*r)) + r;
-         ry = (Math.random() * (0.5-2*r)) + r;
-         vx = 0.1 * (Math.random()*2 - 1);
-         vy = Math.sqrt(0.1*0.1-vx*vx)*(Math.random()<0.5?1:-1);
-         this.r = r;
-         this.m   = m;
-         this.c  = c;
-         this.ID = counter++;
-  	}
-    
-    public Particle(double rx, double vx, double ax, double r, double m){
-    	this(rx,0,vx,0,ax,0,r,m,Color.RED);
-    }
-  
-    public void move(double dt) {
-        rx += vx * dt;
-        ry += vy * dt;
-    }
+	public Particle(double rx, double ry, double vx, double vy, double ax, double ay, double radius, double mass,
+			Color color) {
+		this.vx = vx;
+		this.vy = vy;
+		this.ax = ax;
+		this.ay = ay;
+		this.rx = rx;
+		this.ry = ry;
+		this.r = radius;
+		this.m = mass;
+		this.c = color;
+		this.ID = counter++;
+	}
 
-    public double getDistance(Particle other){
-    	return Math.sqrt(Math.pow(this.rx-other.rx,2)+Math.pow(this.ry-other.ry, 2));
-    }
-    
-    public int hashCode(){
-    	return ID;
-    }
-    
-    public boolean equals(Object o){
-    	if(o == null)
-    		return false;
-    	if(o.getClass() != this.getClass())
-    		return false;
-    	Particle other = (Particle) o;
-    	if(other.ID != this.ID)
-    		return false;
-    	return true;
-    }
-    
-    @Override
-    public String toString() {
-    	return "" + ID;
-    }
-    
-    public Color getC() {
+	public Particle(int ID, double rx, double ry, double vx, double vy, double radius, double mass) {
+		this(rx, ry, vx, vy, 0, 0, radius, mass, Color.red);
+		this.ID = ID;
+	}
+
+	public Particle(double r, double m, Color c) {
+		rx = (Math.random() * (0.5 - 2 * r)) + r;
+		ry = (Math.random() * (0.5 - 2 * r)) + r;
+		vx = 0.1 * (Math.random() * 2 - 1);
+		vy = Math.sqrt(0.1 * 0.1 - vx * vx) * (Math.random() < 0.5 ? 1 : -1);
+		this.r = r;
+		this.m = m;
+		this.c = c;
+		this.ID = counter++;
+	}
+
+	public Particle(double rx, double vx, double ax, double r, double m) {
+		this(rx, 0, vx, 0, ax, 0, r, m, Color.RED);
+	}
+
+	public void move(double dt) {
+		rx += vx * dt;
+		ry += vy * dt;
+	}
+
+	public double getDistance(Particle other) {
+		return Math.sqrt(Math.pow(this.rx - other.rx, 2) + Math.pow(this.ry - other.ry, 2));
+	}
+
+	public int hashCode() {
+		return ID;
+	}
+
+	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		if (o.getClass() != this.getClass())
+			return false;
+		Particle other = (Particle) o;
+		if (other.ID != this.ID)
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "" + ID;
+	}
+
+	public Color getC() {
 		return c;
 	}
-    
-    public double getSpeed(){
-    	return Math.sqrt(vx*vx+vy*vy);
-    }
-    
-    public double distanceToOrigin(){
-    	return Math.sqrt(rx*rx+ry*ry);
-    }
-    
-    
-	
-	
-	
-	
-	
-	
+
+	public double getSpeed() {
+		return Math.sqrt(vx * vx + vy * vy);
+	}
+
+	public double distanceToOrigin() {
+		return Math.sqrt(rx * rx + ry * ry);
+	}
+
 	List<Particle> particlesColided = new ArrayList<>();
 
-	
-
-	
-
-	
 	public double calculatePressure(double friction, double D) {
 		return 1 - Math.exp((-4 * friction * rx) / D);
 	}
@@ -145,14 +130,13 @@ public class Particle {
 	}
 
 	/*
-	 * Si colisiono con una pared, la fuerza cambia
-	 * de sentido
+	 * Si colisiono con una pared, la fuerza cambia de sentido
 	 */
 	private boolean collisionWall(double W, double L, double D) {
 		boolean state = false;
 
 		if (this.rx - r == 0 || this.rx + r == L) {
-			f.y += f.x*Math.signum(f.x)*0.1; //////(CAMBIAR EL MU)
+			f.y += f.x * Math.signum(f.x) * 0.1; ////// (CAMBIAR EL MU)
 			f.x = 0;
 			state = true;
 		}
@@ -163,7 +147,7 @@ public class Particle {
 		double bound2 = (W + D) / 2;
 		if ((posY >= 0 && posY <= bound1) || (posY >= bound2 && posY <= W)) {
 			f.y = 0;
-			f.x -= f.y*0.1*Math.signum(f.x);
+			f.x -= f.y * 0.1 * Math.signum(f.x);
 			state = true;
 		}
 		return state;
@@ -176,7 +160,7 @@ public class Particle {
 	}
 
 	public double getSuperposition(Particle p) {
-		return this.r + p.r - Math.sqrt(Math.pow(this.rx-p.rx,2)+Math.pow(this.ry-p.ry, 2));
+		return this.r + p.r - Math.sqrt(Math.pow(this.rx - p.rx, 2) + Math.pow(this.ry - p.ry, 2));
 	}
 
 	private double calculateNormalForce(Particle p, double kn) {
@@ -186,10 +170,5 @@ public class Particle {
 	private double calculateTanForce(Particle p, double kt) {
 		return -kt * getSuperposition(p) * getRelVelocity(p);
 	}
-	
-	
-
-	
-
 
 }

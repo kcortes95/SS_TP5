@@ -6,7 +6,7 @@ import java.util.Set;
 public class Simulation {
 
 	private final double GRAVITY = 9.8;
-	public static final double mass = 0.01;
+	//public static final double mass = 0.01;
 
 	double dt = 0;
 	double max = 0;

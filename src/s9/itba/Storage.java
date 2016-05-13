@@ -1,8 +1,7 @@
 package s9.itba;
 
-import java.util.ArrayList;
+import java.awt.Color;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Storage {
@@ -25,21 +24,22 @@ public class Storage {
 	public Storage(double W, double L, double D) {
 		this(W, L, D, 0);
 	}
-	
-	public void generateRandomParticles(double time){
+
+	public void generateRandomParticles(double time) {
 		double start = System.currentTimeMillis();
-		while(System.currentTimeMillis()-start<time*1000){
+		while (System.currentTimeMillis() - start < time * 1000) {
 			Particle p = generateRandomPos();
-			if(isValidPos(p))
+			if (isValidPos(p))
 				particles.add(p);
 		}
 	}
-	
-	private Particle generateRandomPos(){
-		double radius = D/20;
-		double x = Math.random()*(W-2*radius)+radius;
-		double y = Math.random()*(L-2*radius)+radius;
-		return new Particle(x, y, radius, Simulation.mass);
+
+	private Particle generateRandomPos() {
+		double radius = D / 20;
+		double x = Math.random() * (W - 2 * radius) + radius;
+		double y = Math.random() * (L - 2 * radius) + radius;
+		// Particle p = new Particle(rx, ry, vx, vy, radius, mass);
+		return new Particle(x, y, 0, 0, 0, 0, radius, Particle.mass, Color.red);
 	}
 
 	public double getD() {
@@ -53,26 +53,26 @@ public class Storage {
 	public double getW() {
 		return W;
 	}
-	
+
 	public Set<Particle> getParticles() {
 		return particles;
 	}
 
 	public int maxParticles() {
-		return maxParticlesX()*maxParticlesY();
+		return maxParticlesX() * maxParticlesY();
 	}
-	
-	public int maxParticlesX(){
-		return (int)(W / D) * 10;
+
+	public int maxParticlesX() {
+		return (int) (W / D) * 10;
 	}
-	
-	public int maxParticlesY(){
-		return (int)(L / D) * 10;
+
+	public int maxParticlesY() {
+		return (int) (L / D) * 10;
 	}
-	
-	public boolean isValidPos(Particle p){
-		for(Particle p2: particles){
-			if(p.getSuperposition(p2)>0)
+
+	public boolean isValidPos(Particle p) {
+		for (Particle p2 : particles) {
+			if (p.getSuperposition(p2) > 0)
 				return false;
 		}
 		return true;
