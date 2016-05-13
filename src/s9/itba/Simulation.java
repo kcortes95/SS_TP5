@@ -2,52 +2,56 @@ package s9.itba;
 
 import java.util.Set;
 
-
 public class Simulation {
-
+	
 	private final double GRAVITY = 9.8;
 	public static final double mass = 0.01;
 
-	double dt = 0;
-	double max = 0;
-	double step = 0;
 	double friccion = 0;
 	Storage s = null;
 	private Set<Particle> particles;
+	private Grid grid;
 
-	public Simulation(double dt, double max, double step, double friccion, Storage s) {
-		this.dt = dt;
-		this.max = max;
-		this.step = step;
+	public Simulation(double friccion, Storage s) {
 		this.s = s;
 		s.friccion = friccion;
+		this.particles = s.getParticles();
+		this.grid = new LinearGrid(s.getL(), (int)Math.floor(s.getL()/(s.getD()/5)), s.getParticles());
 	}
 
-	public void run() {
-		/*
-		 * Esto esta modelado con la fuerza bruta... Obviamente hay que
-		 * implementar el Cell Index Method para calcular cuales son los vecinos
-		 */
-		/*while (step <= max) {
-			for (Particle p1 : s.particles) {
-				for (Particle p2 : s.particles) {
-					if (!p1.equals(p1)) {
-						System.out.println("entro");
-						p1.collision(s.getW(), s.getL(), s.getD(), p2);
-					}
-				}
-				p1.vx = p1.vx + p1.f.x * dt / p1.m;
-				p1.vy = p1.vy + p1.f.y * dt / p1.m;
+	public void run(double totalTime, double dt, double dt2) {
+		int runs = 0;
+		double time = 0, printTime = 0;
+		// Set forces and calculate previous
+		for(Particle p: particles){
+			getF(p);
+			Vector prevPos = eulerPos(p,-dt);
+			Vector prevVel = eulerVel(p,-dt);
+			p.previous = new Particle(p.ID,prevPos.x,prevPos.y,prevVel.x,prevVel.y,p.r,p.m);
+			getF(p.previous);
+		}
+		while(time<=totalTime){
+			if(runs%100==0)
+				System.out.println((100*time/totalTime) + "%");
+			if(printTime<=time){
+				/*double K = totalKineticEnergy(particles);
+				double U = totalPotentialEnergy(particles);
+				Output.getInstace().writeEnergies(K+U,K,U, printTime);*/
+				Output.getInstace().write(particles,time);
+				printTime += dt2;
 			}
-			step += dt;
-		}*/
+			for(Particle p: particles)
+				updatePos(p, dt);
+			time += dt;
+			runs++;
+		}
 	}
 	
-	private void beeman(Particle p){
+	private void beeman(Particle p, double dt){
 		p.next = new Particle(p.ID, 0, 0, 0, 0, p.r, p.m);
 		p.next.rx = p.rx + p.vx*dt + (2.0/3.0)*p.f.x*dt*dt/p.m - (1.0/6.0)*p.previous.f.x*dt*dt/p.m;
 		p.next.ry = p.ry + p.vy*dt + (2.0/3.0)*p.f.y*dt*dt/p.m - (1.0/6.0)*p.previous.f.y*dt*dt/p.m;
-		p.next.f = getF(p.next);
+		getF(p.next);
 		p.next.vx = p.vx + (1.0/3.0)*p.next.f.x*dt/p.m + (5.0/6.0)*p.f.x*dt/p.m - (1.0/6.0)*p.previous.f.x*dt/p.m; 
 		p.next.vy = p.vy + (1.0/3.0)*p.next.f.y*dt/p.m + (5.0/6.0)*p.f.y*dt/p.m - (1.0/6.0)*p.previous.f.y*dt/p.m;
 		
@@ -64,15 +68,59 @@ public class Simulation {
 		p.f = p.next.f;
 	}
 	
-	private Vector getF(Particle p){
-		Vector aux = new Vector (0,0);
-		p.f.y= -p.m * GRAVITY;
-		for (Particle p1: particles){
-			if (!p.equals(p1)){
-				p1.collision(p);
+	private void getF(Particle p){
+		p.f = new Vector(0,-p.m * GRAVITY);
+		// It has left the silo
+		if(grid.getCell(p)!=null){
+			// Check own cell
+			for (Particle p2: grid.getCell(p).getParticles()){
+				if (!p.equals(p2)){
+					p.collision(p2);
+				}
+			}
+			// Check neighbouring cells
+			for(Cell cell: grid.getCell(p).getNeighbours()){
+				for(Particle p2: cell.getParticles()){
+					p.collision(p2);
+				}
 			}
 		}
-		return aux;
+		// Check wall Collision
+		p.collisionWall(s.getW(), s.getL(), s.getD());
+	}
+	
+	private void updatePos(Particle p, double dt){
+		double M = grid.getM();
+		double cellLength = grid.getL()/grid.getM();
+		int cellX = (int) Math.floor(p.rx/cellLength);
+		int cellY = (int) Math.floor(p.ry/cellLength);
+		beeman(p, dt);
+		// If its in the silo update the cells
+		if(cellX>0 && cellX<=M && cellY>0 && cellY<=M){
+			int newCellX = (int)Math.floor(p.rx/cellLength);
+			int newCellY = (int)Math.floor(p.ry/cellLength);
+			if(newCellX != cellX ||newCellY != cellY){
+				//left silo
+				if(newCellX< 0 || newCellX >= M || newCellY < 0 || newCellY >= M){
+					grid.getCell(cellX, cellY).getParticles().remove(p);
+					return;
+				}
+				grid.getCell(cellX, cellY).getParticles().remove(p);
+				grid.insert(p);
+			}
+		}
+	}
+	
+	private Vector eulerPos(Particle part, double dt){
+		double x = part.rx + dt*part.vx + dt*dt*part.f.x/(2*part.m);
+		double y = part.ry + dt*part.vy + dt*dt*part.f.y/(2*part.m);
+		return new Vector(x,y);
+	}
+	
+	private Vector eulerVel(Particle part, double dt){
+		double velx = part.vx + dt*part.f.x/part.m;
+		double vely = part.vy + dt*part.f.y/part.m;
+		return new Vector(velx,vely);
 	}
 
 }

@@ -36,6 +36,10 @@ public class Particle {
         this.ID = counter++;
     }
     
+    public Particle(double rx, double ry, double radius, double mass){
+    	this(rx,ry,0,0,0,0,radius,mass,Color.red);
+    }
+    
     public Particle(int ID, double rx, double ry, double vx, double vy, double radius, double mass){
     	this(rx,ry,vx,vy,0,0,radius,mass,Color.red);
     	this.ID = ID;
@@ -97,32 +101,18 @@ public class Particle {
     	return Math.sqrt(rx*rx+ry*ry);
     }
     
-    
-	
-	
-	
-	
-	
-	
-	List<Particle> particlesColided = new ArrayList<>();
-
-	
-
-	
-
-	
 	public double calculatePressure(double friction, double D) {
-		return 1 - Math.exp((-4 * friction * rx) / D);
-	}
-
-	public double getVelocity() {
-		return Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2));
+		return 1 - Math.exp((-4 * friction * ry) / D);
 	}
 
 	public double getRelVelocity(Particle p) {
-		return p.getVelocity() - this.getVelocity();
+		return p.getSpeed() - this.getSpeed();
 	}
-
+	
+	public Vector getRelPos(Particle other){
+		return new Vector(other.rx-this.rx,other.ry-this.ry);
+	}
+	
 	/*
 	 * Devuelve cual es el angulo que forman las dos particulas respecto a sus
 	 * posiciones Esto lo hacemos para despues poder calcular cuales son las
@@ -134,7 +124,6 @@ public class Particle {
 
 	public boolean collision(Particle p) {
 		if (getSuperposition(p) >= 0) {
-			particlesColided.add(p);
 			double normal = calculateNormalForce(p, kn);
 			double tangencial = calculateTanForce(p, kt);
 			f.x += normal * Math.cos(getAngle(p)) + tangencial * Math.sin(getAngle(p));
@@ -144,14 +133,9 @@ public class Particle {
 		return false;
 	}
 
-	/*
-	 * Si colisiono con una pared, la fuerza cambia
-	 * de sentido
-	 */
-	private boolean collisionWall(double W, double L, double D) {
+	public boolean collisionWall(double W, double L, double D) {
 		boolean state = false;
-
-		if (this.rx - r == 0 || this.rx + r == L) {
+		/*if (this.rx - r <= 0 || this.rx + r >= L) {
 			f.y += f.x*Math.signum(f.x)*0.1; //////(CAMBIAR EL MU)
 			f.x = 0;
 			state = true;
@@ -165,14 +149,14 @@ public class Particle {
 			f.y = 0;
 			f.x -= f.y*0.1*Math.signum(f.x);
 			state = true;
+		}*/
+		double posY = this.ry - r;
+		if(posY<=0){
+			vy = 0;
+			f.y = 0;
+			ry=0+r;
 		}
 		return state;
-	}
-
-	public boolean collision(double W, double L, double D, Particle p) {
-		boolean cParticle = collision(p);
-		boolean cWall = collisionWall(W, L, D);
-		return cParticle || cWall;
 	}
 
 	public double getSuperposition(Particle p) {

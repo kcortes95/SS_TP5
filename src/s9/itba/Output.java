@@ -34,7 +34,7 @@ public class Output {
 			//out.write(100002 + "\t" + limit + "\t" + -limit + "\t" + 10 + "\t0\t0\t0" + "\n");
 			//out.write(100004+ "\t" + limit + "\t" + limit + "\t" + 10 + "\t0\t0\t0" + "\n");
 			for(Particle p: particles)
-				out.write(p.id + "\t" + p.rx + "\t" + p.ry + "\t" + p.radius + "\t" + (p.radius<5?"255":"0") + "\t" + (p.radius<5?"255":"255") + "\t" + (p.radius<5?"255":"255")  + "\n");
+				out.write(p.ID + "\t" + p.rx + "\t" + p.ry + "\t" + p.r + "\t" + (p.r<5?"255":"0") + "\t" + (p.r<5?"255":"255") + "\t" + (p.r<5?"255":"255")  + "\n");
 			//out.write(time + "\t " + p.rx + "\n");
 			out.close();
 		}catch (IOException e) {
