@@ -161,23 +161,36 @@ public class Particle {
 		double mu = Math.pow(10, 5);
 		double limitPos=0, limitVPos;
 		if (this.rx - r <= 0){
-		 limitPos= this.rx-r;
+			limitPos= this.rx-r;
+			//rx = r;
 		}else if (this.rx + r >= W){
 			limitPos = this.rx+r-W;
+			//rx = W-r;
 		}
 		if ( limitPos != 0){
-			System.out.println(f.y);
+			//System.out.println("Vertical: v: " + vx + "," + vy);
+			//System.out.println("F: " + f.x + "," + f.y);
+			//System.out.println("pos: " + rx + "," + ry + "  - r: " + r);
 			this.f.x -= limitPos * mu;
-			System.out.println("vy: " + vy + " - Limitpos: " + limitPos);
+			//System.out.println("vy: " + vy + " - Limitpos: " + limitPos);
 			this.f.y -= kt*this.vy*limitPos; 
-			System.out.println(f.y);
-			try{Thread.sleep(1000);}catch(Exception e){};
+			//System.out.println("Desp f: " +f.x + "," + f.y);
+			//System.out.println();
+			//try{Thread.sleep(1000);}catch(Exception e){};
 		}
 		
 		if (this.ry-r<=0){
-			limitVPos = this.ry-r;
-			this.f.y-= limitVPos * mu;//MODIFICAR CONSTANTE
-			this.f.x -= kt*this.vx;
+			System.out.println("Horiz: - v: " + vx + "," + vy);
+			System.out.println("F: " + f.x + "," + f.y);
+			System.out.println("pos: " + rx + "," + ry + "  - r: " + r);
+			limitVPos = r-this.ry;
+			this.f.y += limitVPos * mu;
+			System.out.println("vx: " + vx + " - LimitVpos: " + limitVPos);
+			this.f.x -= kt*this.vx*limitVPos;
+			System.out.println("Desp f: " +f.x + "," + f.y);
+			System.out.println();
+			try{Thread.sleep(100);}catch(Exception e){};
+			//ry = r;
 		}
 		
 	}

@@ -21,7 +21,7 @@ public class Simulation {
 	}
 
 	public void run(double totalTime, double dt, double dt2) {
-		int runs = 0;
+		int percentage=-1;
 		double time = 0, printTime = 0;
 		// Set forces and calculate previous
 		for(Particle p: particles){
@@ -32,8 +32,12 @@ public class Simulation {
 			getF(p.previous);
 		}
 		while(time<=totalTime){
-			if(runs%100==0)
-				System.out.println((100*time/totalTime) + "%");
+			if((int)(100*time/totalTime)!=percentage){
+				percentage = (int)(100*time/totalTime);
+				System.out.println(percentage + "%");
+				for(Particle p: particles)
+					System.out.println("vx: " + p.vx + " - fx: " + p.f.x);
+			}
 			if(printTime<=time){
 				/*double K = totalKineticEnergy(particles);
 				double U = totalPotentialEnergy(particles);
@@ -44,23 +48,28 @@ public class Simulation {
 			for(Particle p: particles)
 				updatePos(p, dt);
 			time += dt;
-			runs++;
 		}
 	}
 	
 	private void beeman(Particle p, double dt){
+		//System.out.println("EN beeman entro, fx=" + p.f.x + " - fy=" + p.f.y);
 		p.next = new Particle(p.ID, 0, 0, 0, 0, p.r, p.m);
 		p.next.rx = p.rx + p.vx*dt + (2.0/3.0)*p.f.x*dt*dt/p.m - (1.0/6.0)*p.previous.f.x*dt*dt/p.m;
 		p.next.ry = p.ry + p.vy*dt + (2.0/3.0)*p.f.y*dt*dt/p.m - (1.0/6.0)*p.previous.f.y*dt*dt/p.m;
 		
+		//System.out.println("f era: " + p.f.x + "," + p.f.y);
 		//predict next vel
-		Particle predicted = new Particle(p.next.rx, p.next.ry, p.r, p.m);
+		Particle predicted = new Particle(p.ID, p.rx, p.ry, 0, 0, p.r, p.m);
 		predicted.vx = p.vx + (3.0/2.0)*(p.f.x/p.m)*dt-0.5*(p.f.x/p.m)*dt;
 		predicted.vy = p.vy + (3.0/2.0)*(p.f.y/p.m)*dt-0.5*(p.f.y/p.m)*dt;
+		
+		//System.out.println("Predicted v: " + predicted.vx + "," + predicted.vy);
 		
 		//calculate next accel using position and predicted vel
 		getF(predicted);
 		p.next.f = predicted.f;
+		
+		//System.out.println("getF de predicted (next) = " + p.next.f.x + "," + p.next.f.y);
 		
 		p.next.vx = p.vx + (1.0/3.0)*p.next.f.x*dt/p.m + (5.0/6.0)*p.f.x*dt/p.m - (1.0/6.0)*p.previous.f.x*dt/p.m; 
 		p.next.vy = p.vy + (1.0/3.0)*p.next.f.y*dt/p.m + (5.0/6.0)*p.f.y*dt/p.m - (1.0/6.0)*p.previous.f.y*dt/p.m;
@@ -76,6 +85,8 @@ public class Simulation {
 		p.vx = p.next.vx;
 		p.vy = p.next.vy;
 		p.f = p.next.f;
+		/*System.out.println("EN beeman salgo, vx=" + p.vx + " - vy=" + p.vy);
+		try{Thread.sleep(1000);}catch(Exception e){};*/
 	}
 	
 	private void getF(Particle p){
