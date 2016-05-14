@@ -2,6 +2,7 @@ package s9.itba;
 
 import java.util.Set;
 
+
 public class Simulation {
 	
 	private final double GRAVITY = 9.8;
@@ -51,7 +52,16 @@ public class Simulation {
 		p.next = new Particle(p.ID, 0, 0, 0, 0, p.r, p.m);
 		p.next.rx = p.rx + p.vx*dt + (2.0/3.0)*p.f.x*dt*dt/p.m - (1.0/6.0)*p.previous.f.x*dt*dt/p.m;
 		p.next.ry = p.ry + p.vy*dt + (2.0/3.0)*p.f.y*dt*dt/p.m - (1.0/6.0)*p.previous.f.y*dt*dt/p.m;
-		getF(p.next);
+		
+		//predict next vel
+		Particle predicted = new Particle(p.next.rx, p.next.ry, p.r, p.m);
+		predicted.vx = p.vx + (3.0/2.0)*(p.f.x/p.m)*dt-0.5*(p.f.x/p.m)*dt;
+		predicted.vy = p.vy + (3.0/2.0)*(p.f.y/p.m)*dt-0.5*(p.f.y/p.m)*dt;
+		
+		//calculate next accel using position and predicted vel
+		getF(predicted);
+		p.next.f = predicted.f;
+		
 		p.next.vx = p.vx + (1.0/3.0)*p.next.f.x*dt/p.m + (5.0/6.0)*p.f.x*dt/p.m - (1.0/6.0)*p.previous.f.x*dt/p.m; 
 		p.next.vy = p.vy + (1.0/3.0)*p.next.f.y*dt/p.m + (5.0/6.0)*p.f.y*dt/p.m - (1.0/6.0)*p.previous.f.y*dt/p.m;
 		

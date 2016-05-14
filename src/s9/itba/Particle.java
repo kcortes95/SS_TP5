@@ -151,26 +151,33 @@ public class Particle {
 			/*System.out.println("nForce: " + nForce);
 			System.out.println("tForce: " + tForce);
 			System.out.println("F antes: " + f.x + ", " + f.y);*/
-			f.x += nForce * nVersor.x + tForce * tVersor.x;
-			f.y += nForce * nVersor.y + tForce * tVersor.y;
+			f.x += nForce * nVersor.x /*+ tForce * tVersor.x*/;
+			f.y += nForce * nVersor.y /*+ tForce * tVersor.y*/;
 			//System.out.println("F desp: " + f.x + ", " + f.y);
 		}
 	}
 
 	public void collisionWall(double W, double L, double D) {
+		double mu = Math.pow(10, 5);
 		double limitPos=0, limitVPos;
 		if (this.rx - r <= 0){
 		 limitPos= this.rx-r;
 		}else if (this.rx + r >= W){
-			limitPos = this.rx+r;
+			limitPos = this.rx+r-W;
 		}
 		if ( limitPos != 0){
-			this.f.x-= limitPos * 0.4;
+			System.out.println(f.y);
+			this.f.x -= limitPos * mu;
+			System.out.println("vy: " + vy + " - Limitpos: " + limitPos);
+			this.f.y -= kt*this.vy*limitPos; 
+			System.out.println(f.y);
+			try{Thread.sleep(1000);}catch(Exception e){};
 		}
 		
 		if (this.ry-r<=0){
 			limitVPos = this.ry-r;
-			this.f.y-= limitVPos * 0.4;//MODIFICAR CONSTANTE
+			this.f.y-= limitVPos * mu;//MODIFICAR CONSTANTE
+			this.f.x -= kt*this.vx;
 		}
 		
 	}

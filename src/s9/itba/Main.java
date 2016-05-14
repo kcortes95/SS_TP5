@@ -3,13 +3,13 @@ package s9.itba;
 public class Main {
 
 	public static void main(String[] args) {
-		double dt = 0.0001;
+		double dt = 0.000001;
 		double dt2 = 0.01;
 
 		Storage s = new Storage(10, 20, 5);
 		s.generateRandomParticles(2);
 		Simulation sim = new Simulation(0.95, s);
-		sim.run(10,dt,dt2);
+		sim.run(1000,dt,dt2);
 	}
 
 }
