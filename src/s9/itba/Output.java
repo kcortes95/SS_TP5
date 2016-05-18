@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.Set;
 
 
+
 public class Output {
 	private static Output instance = null;
 	
@@ -29,12 +30,12 @@ public class Output {
 			//comment line
 			//System.out.println("Frame : " + count++);
 			out.write("Comment line\n");
-			out.write(100000 + "\t" + 0 + "\t" + 20 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
+			out.write(100000 + "\t" + 0 + "\t" + 15 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
 			out.write(100001 + "\t" + 0 + "\t" + 0 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
 			out.write(100002 + "\t" + 10 + "\t" + 0 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
-			out.write(100004+ "\t" + 10 + "\t" + 20 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
+			out.write(100004+ "\t" + 10 + "\t" + 15 + "\t" + 0.5 + "\t0\t0\t0" + "\n");
 			for(Particle p: particles)
-				out.write(p.ID + "\t" + p.rx + "\t" + p.ry + "\t" + p.r + "\t" + ((p.ID*10)%256) + "\t" + ((p.ID*20)%256) + "\t" + ((p.ID*30)%256)  + "\n");
+				out.write(p.ID + "\t" + p.rx + "\t" + p.ry + "\t" + p.r + "\t" + 255 + "\t" + 255 + "\t" + 255  + "\n");
 			//out.write(time + "\t " + p.rx + "\n");
 			out.close();
 		}catch (IOException e) {
@@ -42,54 +43,45 @@ public class Output {
 		}
 	}
 	
-	public void writeEnergies(double E, double K, double U, double time){
+	public void writeEnergy(Set<Particle> particles, double time){
 		if(time == 0){
 			try{
-				PrintWriter pw = new PrintWriter("output.txt");
+				PrintWriter pw = new PrintWriter("energy.txt");
 				pw.close();
 			}catch (Exception e){
 				e.printStackTrace();
 			}
 		}
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.txt", true)))) {
-			out.write(time + "\t" + K + "\t" + U + "\t" + E + "\n");
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("energy.xyz", true)))) {
+			out.write(time + "\t" +(getK(particles)) + "\n");
 			out.close();
 		}catch (IOException e) {
 		    e.printStackTrace();
 		}
 	}
 	
-	public void writeNumberParticles(int amount, double time){
+	public void writeAmount(Set<Particle> particles, double time){
 		if(time == 0){
 			try{
-				PrintWriter pw = new PrintWriter("output.txt");
+				PrintWriter pw = new PrintWriter("amount.txt");
 				pw.close();
 			}catch (Exception e){
 				e.printStackTrace();
 			}
 		}
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.txt", true)))) {
-			out.write(time + "\t" + amount +"\n");
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("amount.xyz", true)))) {
+			out.write(time + "\t" + particles.size() + "\n");
 			out.close();
 		}catch (IOException e) {
 		    e.printStackTrace();
 		}
 	}
 	
-	public void writeOscillate(double x, double time){
-		if(time == 0){
-			try{
-				PrintWriter pw = new PrintWriter("output.txt");
-				pw.close();
-			}catch (Exception e){
-				e.printStackTrace();
-			}
+	private double getK(Set<Particle> particles){
+		double K = 0;
+		for(Particle p: particles){
+			K += 0.5*p.m*p.vx*p.vx*p.vy*p.vy;
 		}
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.txt", true)))) {
-			out.write(time + "\t" + x +"\n");
-			out.close();
-		}catch (IOException e) {
-		    e.printStackTrace();
-		}
+		return K;
 	}
 }

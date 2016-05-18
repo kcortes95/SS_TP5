@@ -18,7 +18,9 @@ public abstract class Grid {
 				cells[i][j] = new Cell();
 			}
 		}
-		offset = M;
+		offset = 0.1;
+		System.out.println("L: " + L + " - M: " + M);
+		try{Thread.sleep(1000);}catch(Exception e){};
 		insertParticles(particles);
 		calculateNeighbours();
 	}
@@ -50,18 +52,17 @@ public abstract class Grid {
 	}
 	
 	public Cell getCell(Particle p){
-		int x = (int) (Math.floor((p.rx+offset)/(L/M)));
-		int y = (int) (Math.floor((p.ry+offset)/(L/M)));
-		/*try{
-			System.out.println(x + ", " + y);
-			Thread.sleep(10);
-		}catch(Exception e){
-			
-		}*/
-		if(x<0 || x>=M || y<0 || y>=M){
+		return getCell(p.rx,p.ry);
+	}
+	
+	public Cell getCell(double x, double y){
+		int cx = (int) (Math.floor((x+offset)/(L/M)));
+		int cy = (int) (Math.floor((y+offset)/(L/M)));
+
+		if(cx<0 || cx>=M || cy<0 || cy>=M){
 			return null;
 		}
-		return cells[x][y];
+		return cells[cx][cy];
 	}
 	
 	public Cell[][] getGrid(){

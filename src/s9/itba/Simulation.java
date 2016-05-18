@@ -12,14 +12,17 @@ public class Simulation {
 	double friccion = 0;
 	Storage s = null;
 	private Set<Particle> particles;
+	private Set<Particle> outOfBox;
+	Set<Particle> toBeRemoved = new HashSet<Particle>();
 	private Grid grid;
 
 	public Simulation(double friccion, Storage s) {
 		this.s = s;
 		s.friccion = friccion;
 		this.particles = s.getParticles();
-		double L = s.getL()+2*(int)Math.floor(s.getL()/(s.getD()/5));
-		this.grid = new LinearGrid(L, (int)Math.floor(s.getL()/(s.getD()/5)), s.getParticles());
+		this.outOfBox = new HashSet<Particle>();
+		double L = s.getL()+2*0.1;
+		this.grid = new LinearGrid(L, (int)Math.floor(L/(s.getD()/5))/2, s.getParticles());
 	}
 
 	public void run(double totalTime, double dt, double dt2) {
@@ -39,6 +42,7 @@ public class Simulation {
 			if((int)(100*time/totalTime)!=percentage){
 				percentage = (int)(100*time/totalTime);
 				System.out.println(percentage + "%");
+				System.out.println("N° particles = " + particles.size());
 				/*for(Particle p: particles)
 					System.out.println("vx: " + p.vx + " - fx: " + p.f.x);*/
 			}
@@ -47,11 +51,27 @@ public class Simulation {
 				double U = totalPotentialEnergy(particles);
 				Output.getInstace().writeEnergies(K+U,K,U, printTime);*/
 				Output.getInstace().write(particles,time);
+				Output.getInstace().writeEnergy(particles, printTime);
+				Output.getInstace().writeAmount(particles, printTime);
 				printTime += dt2;
 			}
 			beeman(particles,dt);
-			/*for(Particle p: particles)
-				updatePos(p, dt);*/
+			for(Particle p: particles){
+				//updateCell(p);
+				if(p.ry<0){
+					p.outOfBox = true;
+					outOfBox.add(p);
+				}
+			}
+			for(Particle p: outOfBox){
+				particles.remove(p);
+				if(p.ry<-s.getL()/4)
+					toBeRemoved.add(p);
+			}
+			for(Particle p: toBeRemoved){
+				outOfBox.remove(p);
+			}
+			toBeRemoved.clear();
 			time += dt;
 		}
 	}
@@ -186,6 +206,8 @@ public class Simulation {
 		for(Particle p: particles)
 			p.f = new Vector(0,-p.m * GRAVITY);
 		for(Particle p: particles){
+			if(p.outOfBox)
+				return;
 			if(!p.checked){
 				p.checked = true;
 				for(Particle p2: particles){
@@ -195,18 +217,32 @@ public class Simulation {
 				}
 			}
 		}
-		// It has left the silo
-		/*if(grid.getCell(p)!=null){
-			// Check own cell
-			for (Particle p2: grid.getCell(p).getParticles()){
-				if (!p.equals(p2)){
-					p.collision(p2);
+		/*for(Particle p: particles){
+			if(p.outOfBox)
+				return;
+			System.out.println("is check?");
+			if(!p.checked){
+				System.out.println("no");
+				p.checked = true;
+				// Check own cell
+				for (Particle p2: grid.getCell(p).getParticles()){
+					if(!p2.checked){
+						System.out.println("uno que no checked");
+						try{Thread.sleep(5000);}catch(Exception e){};
+					}
+					if (!p.equals(p2) && !p2.checked){
+						System.out.println("colliding");
+						p.collision(p2);
+					}
 				}
-			}
-			// Check neighbouring cells
-			for(Cell cell: grid.getCell(p).getNeighbours()){
-				for(Particle p2: cell.getParticles()){
-					p.collision(p2);
+				// Check neighbouring cells
+				for(Cell cell: grid.getCell(p).getNeighbours()){
+					for(Particle p2: cell.getParticles()){
+						System.out.println("In neighbour cell - " + p2.checked);
+						if(!p.equals(p2) && !p2.checked)
+							System.out.println("colliding");
+							p.collision(p2);
+					}
 				}
 			}
 		}*/
@@ -215,31 +251,18 @@ public class Simulation {
 			if(p.ry>=-p.r)
 				p.collisionWall(s.getW(), s.getL(), s.getD());
 		}
-		/*if(p.f.y>0)
-			p.f.y*=0.9;*/
 	}
 	
-	/*private void updatePos(Particle p, double dt){
-		double M = grid.getM();
-		double cellLength = grid.getL()/grid.getM();
-		int cellX = (int) Math.floor((p.rx+M)/cellLength);
-		int cellY = (int) Math.floor((p.ry+M)/cellLength);
-		beeman(p, dt);
-		// If its in the silo update the cells
-		if(cellX>0 && cellX<=M && cellY>0 && cellY<=M){
-			int newCellX = (int)Math.floor((p.rx+M)/cellLength);
-			int newCellY = (int)Math.floor((p.ry+M)/cellLength);
-			if(newCellX != cellX ||newCellY != cellY){
-				//left silo
-				if(newCellX< 0 || newCellX >= M || newCellY < 0 || newCellY >= M){
-					grid.getCell(cellX, cellY).getParticles().remove(p);
-					return;
-				}
-				grid.getCell(cellX, cellY).getParticles().remove(p);
+	private void updateCell(Particle p){
+		Cell previous = grid.getCell(p.previous);
+		Cell current = grid.getCell(p);
+		if(!previous.equals(current)){
+			previous.getParticles().remove(p);
+			if(current != null){
 				grid.insert(p);
 			}
 		}
-	}*/
+	}
 	
 	private Vector eulerPos(Particle part, double dt){
 		double x = part.rx + dt*part.vx + dt*dt*part.f.x/(2*part.m);
@@ -254,17 +277,8 @@ public class Simulation {
 	}
 	
 	public void clearMarks(Set<Particle> particles){
-		Set<Particle> toBeRemoved = new HashSet<Particle>();
 		for(Particle p: particles){
-			if(p.ry>=-p.r){
-				p.checked = false;
-			}else if(p.ry<-s.getL()/2){
-				toBeRemoved.add(p);
-			}
+			p.checked = false;
 		}
-		for(Particle p: toBeRemoved){
-			particles.remove(p);
-		}
-		toBeRemoved.clear();
 	}
 }

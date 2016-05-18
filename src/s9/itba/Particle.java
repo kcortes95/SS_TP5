@@ -22,7 +22,7 @@ public class Particle {
     public double m;   
     private Color c;     
     public int ID;
-    public boolean checked = false;
+    public boolean checked = false, outOfBox=false;
     
 
     public Particle(double rx, double ry, double vx, double vy, double ax, double ay, double radius, double mass, Color color) {
