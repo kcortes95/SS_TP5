@@ -7,6 +7,7 @@ public abstract class Grid {
 	private Cell[][] cells;
 	private double L;
 	private int M;
+	private double offset;
 	
 	public Grid(double L, int M, Set<Particle> particles){
 		this.L = L;
@@ -17,6 +18,7 @@ public abstract class Grid {
 				cells[i][j] = new Cell();
 			}
 		}
+		offset = M;
 		insertParticles(particles);
 		calculateNeighbours();
 	}
@@ -30,16 +32,16 @@ public abstract class Grid {
 	}
 	
 	public void insert(Particle p){
-		int x = (int) (Math.floor(p.rx/(L/M)));
-		int y = (int) (Math.floor(p.ry/(L/M)));
-		if(x<0 || x>=M || y<0 || y>=M)
-			System.out.println(p.rx + "," + p.ry + " - " + x + "," + y);
+		int x = (int) (Math.floor((p.rx+offset)/(L/M)));
+		int y = (int) (Math.floor((p.ry+offset)/(L/M)));
+		/*if(x<0 || x>=M || y<0 || y>=M)
+			System.out.println(p.rx + "," + p.ry + " - " + x + "," + y);*/
 		cells[x][y].getParticles().add(p);
 	}
 	
 	public void remove(Particle p){
-		int x = (int) (Math.floor(p.rx/(L/M)));
-		int y = (int) (Math.floor(p.ry/(L/M)));
+		int x = (int) (Math.floor((p.rx+offset)/(L/M)));
+		int y = (int) (Math.floor((p.ry+offset)/(L/M)));
 		cells[x][y].getParticles().remove(p);
 	}
 	
@@ -48,8 +50,8 @@ public abstract class Grid {
 	}
 	
 	public Cell getCell(Particle p){
-		int x = (int) (Math.floor(p.rx/(L/M)));
-		int y = (int) (Math.floor(p.ry/(L/M)));
+		int x = (int) (Math.floor((p.rx+offset)/(L/M)));
+		int y = (int) (Math.floor((p.ry+offset)/(L/M)));
 		/*try{
 			System.out.println(x + ", " + y);
 			Thread.sleep(10);

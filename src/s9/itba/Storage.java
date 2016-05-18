@@ -28,10 +28,10 @@ public class Storage {
 		double start = System.currentTimeMillis();
 		int n=0;
 		//while(System.currentTimeMillis()-start<time*1000){
-		while (n<1){
+		while (n<8){
 			Particle p = generateRandomPos();
 			if(isValidPos(p)){
-				p.vx = 5;
+				//p.vx = 5*(Math.random()>0.5?1:-1);
 				particles.add(p);
 				n++;
 			}

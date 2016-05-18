@@ -8,10 +8,11 @@ import java.util.*;
 public class Particle {
 
 
-	public static final double kn = Math.pow(10,5);
+	public static final double kn = Math.pow(10, 5);
 	public static final double kt = 2*kn;
+	public static final double mu = kn;
 	
-	public Particle previous, next;
+	public Particle previous, next, pred;
     static int counter = 1;
     public Vector f;
     public double rx, ry;    
@@ -59,11 +60,6 @@ public class Particle {
     
     public Particle(double rx, double vx, double ax, double r, double m){
     	this(rx,0,vx,0,ax,0,r,m,Color.RED);
-    }
-  
-    public void move(double dt) {
-        rx += vx * dt;
-        ry += vy * dt;
     }
 
     public double getDistance(Particle other){
@@ -120,9 +116,8 @@ public class Particle {
 		return new Vector(-relDist.y,relDist.x);
 	}
 	
-	public double getTanVel(Particle p){
-		Vector tVersor = getTanVersor(p);
-		return Math.sqrt(Math.pow(this.vx*tVersor.x,2)+Math.pow(this.vy*tVersor.y,2));
+	public double getTanVel(Vector tVersor){
+		return Math.sqrt(Math.pow(this.vx*tVersor.x,2)+Math.pow(this.vy*tVersor.y,2))*(angBetweenVec(tVersor, new Vector(vx,vy))<Math.PI/2?1:-1);
 	}
 	
 	public Vector getRelPos(Particle other){
@@ -139,26 +134,57 @@ public class Particle {
 	}
 
 	public void collision(Particle p) {
-		if (getSuperposition(p) >= 0) {
+		if(Double.isNaN(getSuperposition(p))){
+			System.out.println("EN GETSUPERPOSITION");
+			try{Thread.sleep(10000);}catch(Exception e){};
+		}
+		if (getSuperposition(p) > 0) {
 			double nForce = calculateNormalForce(p, kn);
 			double tForce = calculateTanForce(p, kt);
+			if(Double.isNaN(nForce) || Double.isNaN(tForce) || Double.isInfinite(nForce) || Double.isInfinite(tForce)){
+				System.out.println("EN FORCE");
+				System.out.println("Superpos: " + getSuperposition(p));
+				System.out.println("Pos this: " + this.rx + "," + this.ry);
+				System.out.println("Pos other: " + p.rx + "," + p.ry);
+				System.out.println("Vel this: " + this.vx + "," + this.vy);
+				System.out.println("Vel other: " + p.vx + "," + p.vy);
+				try{Thread.sleep(10000);}catch(Exception e){};
+			}
 			Vector nVersor = getNormalVersor(p);
-			/*try{
-				System.out.println(nForce);
-				Thread.sleep(500);
-			}catch(Exception e){};*/
 			Vector tVersor = getTanVersor(p);
-			/*System.out.println("nForce: " + nForce);
-			System.out.println("tForce: " + tForce);
-			System.out.println("F antes: " + f.x + ", " + f.y);*/
-			f.x += nForce * nVersor.x /*+ tForce * tVersor.x*/;
-			f.y += nForce * nVersor.y /*+ tForce * tVersor.y*/;
+			//if(Double.isNaN(nVersor.x) || Double.isNaN(nVersor.x) || Double.isNaN(nVersor.y) || Double.isNaN(tVersor.y)){
+			if(nVersor.x<-1 || nVersor.x>1 || nVersor.y<-1 || nVersor.y>1 || tVersor.x<-1 || tVersor.x>1 || tVersor.y<-1 || tVersor.y>1){
+				System.out.println("EN VERSORES");
+				System.out.println("nVERSOR : " + nVersor.x + "," + nVersor.y);
+				System.out.println("tVERSOR : " + tVersor.x + "," + tVersor.y);
+				System.out.println("Superpos: " + getSuperposition(p));
+				System.out.println("Pos this: " + this.rx + "," + this.ry);
+				System.out.println("Pos other: " + p.rx + "," + p.ry);
+				System.out.println("Vel this: " + this.vx + "," + this.vy);
+				System.out.println("Vel other: " + p.vx + "," + p.vy);
+				try{Thread.sleep(10000);}catch(Exception e){};
+			}
+			if(Math.abs(nForce)>10000 || Math.abs(tForce)>10000){
+				System.out.println("\nEntre " + ID + " y " + p.ID);
+				System.out.println("F antes: " + f.x + ", " + f.y);
+				System.out.println("nForce: " + nForce);
+				System.out.println("tForce: " + tForce);
+				System.out.println("Superpos: " + getSuperposition(p));
+				System.out.println("Pos this: " + this.rx + "," + this.ry);
+				System.out.println("Pos other: " + p.rx + "," + p.ry);
+				System.out.println("Vel this: " + this.vx + "," + this.vy);
+				System.out.println("Vel other: " + p.vx + "," + p.vy);
+				try{Thread.sleep(100);}catch(Exception e){};
+			}
+			f.x += nForce * nVersor.x + tForce * tVersor.x;
+			f.y += nForce * nVersor.y + tForce * tVersor.y;
+			p.f.x += -nForce * nVersor.x - tForce * tVersor.x;
+			p.f.y += -nForce * nVersor.y - tForce * tVersor.y;
 			//System.out.println("F desp: " + f.x + ", " + f.y);
 		}
 	}
 
 	public void collisionWall(double W, double L, double D) {
-		double mu = Math.pow(10, 5);
 		double limitPos=0, limitVPos;
 		if (this.rx - r <= 0){
 			limitPos= this.rx-r;
@@ -173,26 +199,39 @@ public class Particle {
 			//System.out.println("pos: " + rx + "," + ry + "  - r: " + r);
 			this.f.x -= limitPos * mu;
 			//System.out.println("vy: " + vy + " - Limitpos: " + limitPos);
-			this.f.y -= kt*this.vy*limitPos; 
+			this.f.y -= kt*this.vy*limitPos*Math.signum(limitPos);//*0.05; 
 			//System.out.println("Desp f: " +f.x + "," + f.y);
 			//System.out.println();
-			//try{Thread.sleep(1000);}catch(Exception e){};
+
+			if(Double.isInfinite(this.f.x) || Double.isInfinite(this.f.y)){
+				System.out.println("EN WALL COLLISION - PARED");
+				System.out.println("fx = " + this.f.x + " - fy = " + this.f.y);
+				System.out.println("vx = " + this.vx + " - vy = " + this.vy);
+				try{Thread.sleep(10000);}catch(Exception e){};
+			}
 		}
-		
-		if (this.ry-r<=0){
-			System.out.println("Horiz: - v: " + vx + "," + vy);
-			System.out.println("F: " + f.x + "," + f.y);
-			System.out.println("pos: " + rx + "," + ry + "  - r: " + r);
-			limitVPos = r-this.ry;
+		limitVPos = r-this.ry;
+		if (limitVPos>0){
 			this.f.y += limitVPos * mu;
-			System.out.println("vx: " + vx + " - LimitVpos: " + limitVPos);
-			this.f.x -= kt*this.vx*limitVPos;
-			System.out.println("Desp f: " +f.x + "," + f.y);
-			System.out.println();
-			try{Thread.sleep(100);}catch(Exception e){};
+			this.f.x -= kt*this.vx*limitVPos;//*0.01;
+			//System.out.println("Desp f: " +f.x + "," + f.y);
+			//System.out.println();
+			//try{Thread.sleep(100);}catch(Exception e){};
 			//ry = r;
+			if(Double.isInfinite(this.f.x) || Double.isInfinite(this.f.y)){
+				System.out.println("EN WALL COLLISION - PISO");
+				try{Thread.sleep(10000);}catch(Exception e){};
+			}
 		}
-		
+		limitVPos = this.ry+r-L;
+		if(limitVPos>0){
+			this.f.y -= limitVPos * mu;
+			this.f.x -= kt*this.vx*limitVPos;
+			if(Double.isInfinite(this.f.x) || Double.isInfinite(this.f.y)){
+				System.out.println("EN WALL COLLISION - TECHO");
+				try{Thread.sleep(10000);}catch(Exception e){};
+			}
+		}
 	}
 
 	public double getSuperposition(Particle p) {
@@ -204,6 +243,31 @@ public class Particle {
 	}
 
 	private double calculateTanForce(Particle p, double kt) {
-		return -kt * getSuperposition(p) * getTanVel(p);
+		Vector tVersor = getTanVersor(p);
+		return -kt * getSuperposition(p) * (getTanVel(tVersor)-p.getTanVel(tVersor));
+	}
+	
+	private double angBetweenVec(Vector v1, Vector v2){
+		return Math.acos((v1.x*v2.x+v1.y*v2.y)/(Math.sqrt(v1.x*v1.x+v1.y*v1.y)*Math.sqrt(v2.x*v2.x+v2.y*v2.y)));
+	}
+	
+	public static void main(String[] args) {
+		//Particle p = new Particle(ID, rx, ry, vx, vy, radius, mass)
+		Particle p1 = new Particle(55, 0, 0, 1, 0,2,7);
+		Particle p2 = new Particle(56, 1, 1, -1, 0,2,7);
+		System.out.println("P1\n------------------");
+		System.out.println("tVersor: " + p1.getTanVersor(p2));
+		System.out.println("nVersor: " + p1.getNormalVersor(p2));
+		System.out.println("tanVel = " + p1.getTanVel(p1.getTanVersor(p2)));
+		System.out.println("dTanVel = " + (p1.getTanVel(p1.getTanVersor(p2))-p2.getTanVel(p1.getTanVersor(p2))));
+		Vector t = p1.getTanVersor(p2);
+		System.out.println("Angle between tanVersor and tanVel = " + p1.angBetweenVec(t, new Vector(-1,0)));
+		System.out.println("\nP2\n------------------");
+		System.out.println("tVersor: " + p2.getTanVersor(p1));
+		System.out.println("nVersor: " + p2.getNormalVersor(p1));
+		//System.out.println("tanVel = " + p2.getTanVel(p1));
+		//System.out.println("dTanVel = " + (p2.getTanVel(p1)-p1.getTanVel(p2)));
+		Vector t2 = p1.getTanVersor(p2);
+		System.out.println("Angle between tanVersor and tanVel = " + p1.angBetweenVec(t, new Vector(p2.vx,p2.vy)));
 	}
 }
