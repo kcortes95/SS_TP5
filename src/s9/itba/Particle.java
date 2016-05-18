@@ -117,7 +117,7 @@ public class Particle {
 	}
 	
 	public double getTanVel(Vector tVersor){
-		return Math.sqrt(Math.pow(this.vx*tVersor.x,2)+Math.pow(this.vy*tVersor.y,2))*(angBetweenVec(tVersor, new Vector(vx,vy))<Math.PI/2?1:-1);
+		return this.vx*tVersor.x+this.vy*tVersor.y;
 	}
 	
 	public Vector getRelPos(Particle other){
@@ -134,53 +134,15 @@ public class Particle {
 	}
 
 	public void collision(Particle p) {
-		/*if(Double.isNaN(getSuperposition(p))){
-			System.out.println("EN GETSUPERPOSITION");
-			try{Thread.sleep(10000);}catch(Exception e){};
-		}*/
 		if (getSuperposition(p) > 0) {
 			double nForce = calculateNormalForce(p, kn);
 			double tForce = calculateTanForce(p, kt);
-			/*if(Double.isNaN(nForce) || Double.isNaN(tForce) || Double.isInfinite(nForce) || Double.isInfinite(tForce)){
-				System.out.println("EN FORCE");
-				System.out.println("Superpos: " + getSuperposition(p));
-				System.out.println("Pos this: " + this.rx + "," + this.ry);
-				System.out.println("Pos other: " + p.rx + "," + p.ry);
-				System.out.println("Vel this: " + this.vx + "," + this.vy);
-				System.out.println("Vel other: " + p.vx + "," + p.vy);
-				try{Thread.sleep(10000);}catch(Exception e){};
-			}*/
 			Vector nVersor = getNormalVersor(p);
 			Vector tVersor = getTanVersor(p);
-			//if(Double.isNaN(nVersor.x) || Double.isNaN(nVersor.x) || Double.isNaN(nVersor.y) || Double.isNaN(tVersor.y)){
-			/*if(nVersor.x<-1 || nVersor.x>1 || nVersor.y<-1 || nVersor.y>1 || tVersor.x<-1 || tVersor.x>1 || tVersor.y<-1 || tVersor.y>1){
-				System.out.println("EN VERSORES");
-				System.out.println("nVERSOR : " + nVersor.x + "," + nVersor.y);
-				System.out.println("tVERSOR : " + tVersor.x + "," + tVersor.y);
-				System.out.println("Superpos: " + getSuperposition(p));
-				System.out.println("Pos this: " + this.rx + "," + this.ry);
-				System.out.println("Pos other: " + p.rx + "," + p.ry);
-				System.out.println("Vel this: " + this.vx + "," + this.vy);
-				System.out.println("Vel other: " + p.vx + "," + p.vy);
-				try{Thread.sleep(10000);}catch(Exception e){};
-			}*/
-			/*if(Math.abs(nForce)>10000 || Math.abs(tForce)>10000){
-				System.out.println("\nEntre " + ID + " y " + p.ID);
-				System.out.println("F antes: " + f.x + ", " + f.y);
-				System.out.println("nForce: " + nForce);
-				System.out.println("tForce: " + tForce);
-				System.out.println("Superpos: " + getSuperposition(p));
-				System.out.println("Pos this: " + this.rx + "," + this.ry);
-				System.out.println("Pos other: " + p.rx + "," + p.ry);
-				System.out.println("Vel this: " + this.vx + "," + this.vy);
-				System.out.println("Vel other: " + p.vx + "," + p.vy);
-				try{Thread.sleep(100);}catch(Exception e){};
-			}*/
 			f.x += nForce * nVersor.x + tForce * tVersor.x;
 			f.y += nForce * nVersor.y + tForce * tVersor.y;
 			p.f.x += -nForce * nVersor.x - tForce * tVersor.x;
 			p.f.y += -nForce * nVersor.y - tForce * tVersor.y;
-			//System.out.println("F desp: " + f.x + ", " + f.y);
 		}
 	}
 
@@ -188,49 +150,22 @@ public class Particle {
 		double limitPos=0, limitVPos;
 		if (this.rx - r <= 0){
 			limitPos= this.rx-r;
-			//rx = r;
 		}else if (this.rx + r >= W){
 			limitPos = this.rx+r-W;
-			//rx = W-r;
 		}
 		if ( limitPos != 0){
-			//System.out.println("Vertical: v: " + vx + "," + vy);
-			//System.out.println("F: " + f.x + "," + f.y);
-			//System.out.println("pos: " + rx + "," + ry + "  - r: " + r);
 			this.f.x -= limitPos * mu;
-			//System.out.println("vy: " + vy + " - Limitpos: " + limitPos);
-			this.f.y -= kt*this.vy*limitPos*Math.signum(limitPos);//*0.05; 
-			//System.out.println("Desp f: " +f.x + "," + f.y);
-			//System.out.println();
-
-			/*if(Double.isInfinite(this.f.x) || Double.isInfinite(this.f.y)){
-				System.out.println("EN WALL COLLISION - PARED");
-				System.out.println("fx = " + this.f.x + " - fy = " + this.f.y);
-				System.out.println("vx = " + this.vx + " - vy = " + this.vy);
-				try{Thread.sleep(10000);}catch(Exception e){};
-			}*/
+			this.f.y -= kt*this.vy*limitPos*Math.signum(limitPos);
 		}
 		limitVPos = r-this.ry;
 		if (limitVPos>0 && (rx<=(W-D)/2 || rx>=(W+D)/2)){
 			this.f.y += limitVPos * mu;
-			this.f.x -= kt*this.vx*limitVPos;//*0.01;
-			//System.out.println("Desp f: " +f.x + "," + f.y);
-			//System.out.println();
-			//try{Thread.sleep(100);}catch(Exception e){};
-			//ry = r;
-			/*if(Double.isInfinite(this.f.x) || Double.isInfinite(this.f.y)){
-				System.out.println("EN WALL COLLISION - PISO");
-				try{Thread.sleep(10000);}catch(Exception e){};
-			}*/
+			this.f.x -= kt*this.vx*limitVPos;
 		}
 		limitVPos = this.ry+r-L;
 		if(limitVPos>0){
 			this.f.y -= limitVPos * mu;
 			this.f.x -= kt*this.vx*limitVPos;
-			/*if(Double.isInfinite(this.f.x) || Double.isInfinite(this.f.y)){
-				System.out.println("EN WALL COLLISION - TECHO");
-				try{Thread.sleep(10000);}catch(Exception e){};
-			}*/
 		}
 	}
 
@@ -245,9 +180,5 @@ public class Particle {
 	private double calculateTanForce(Particle p, double kt) {
 		Vector tVersor = getTanVersor(p);
 		return -kt * getSuperposition(p) * (getTanVel(tVersor)-p.getTanVel(tVersor));
-	}
-	
-	private double angBetweenVec(Vector v1, Vector v2){
-		return Math.acos((v1.x*v2.x+v1.y*v2.y)/(Math.sqrt(v1.x*v1.x+v1.y*v1.y)*Math.sqrt(v2.x*v2.x+v2.y*v2.y)));
 	}
 }

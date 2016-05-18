@@ -52,7 +52,7 @@ public class Output {
 				e.printStackTrace();
 			}
 		}
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("energy.xyz", true)))) {
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("energy.txt", true)))) {
 			out.write(time + "\t" +(getK(particles)) + "\n");
 			out.close();
 		}catch (IOException e) {
@@ -69,7 +69,7 @@ public class Output {
 				e.printStackTrace();
 			}
 		}
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("amount.xyz", true)))) {
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("amount.txt", true)))) {
 			out.write(time + "\t" + particles.size() + "\n");
 			out.close();
 		}catch (IOException e) {

@@ -19,8 +19,6 @@ public abstract class Grid {
 			}
 		}
 		offset = 0.1;
-		System.out.println("L: " + L + " - M: " + M);
-		try{Thread.sleep(1000);}catch(Exception e){};
 		insertParticles(particles);
 		calculateNeighbours();
 	}
@@ -36,8 +34,6 @@ public abstract class Grid {
 	public void insert(Particle p){
 		int x = (int) (Math.floor((p.rx+offset)/(L/M)));
 		int y = (int) (Math.floor((p.ry+offset)/(L/M)));
-		/*if(x<0 || x>=M || y<0 || y>=M)
-			System.out.println(p.rx + "," + p.ry + " - " + x + "," + y);*/
 		cells[x][y].getParticles().add(p);
 	}
 	
