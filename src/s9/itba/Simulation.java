@@ -90,36 +90,24 @@ public class Simulation {
 		getF(predicted);
 		
 		for(Particle p: particles){
-			if(Double.isNaN(p.pred.f.x) || Double.isNaN(p.pred.f.y)){
-				System.out.println("f era: " + p.f.x + "," + p.f.y);
-				System.out.println("rx,ry: " + p.pred.rx + "," + p.pred.ry);
-				System.out.println("Predicted v: " + p.pred.vx + "," + p.pred.vy);
+			if(p.pred != null && p.pred.f != null){
+				p.next.f = p.pred.f;
+				
+				p.next.vx = p.vx + (5.0/12.0)*p.next.f.x*dt/p.m + (2.0/3.0)*p.f.x*dt/p.m - (1.0/12.0)*p.previous.f.x*dt/p.m; 
+				p.next.vy = p.vy + (5.0/12.0)*p.next.f.y*dt/p.m + (2.0/3.0)*p.f.y*dt/p.m - (1.0/12.0)*p.previous.f.y*dt/p.m;
+				
+				p.previous.rx = p.rx;
+				p.previous.ry = p.ry;
+				p.previous.vx = p.vx;
+				p.previous.vy = p.vy;
+				p.previous.f = p.f;
+				
+				p.vx = p.next.vx;
+				p.vy = p.next.vy;
+				p.f = p.next.f;
 			}
-			p.next.f = p.pred.f;
-			
-			p.next.vx = p.vx + (5.0/12.0)*p.next.f.x*dt/p.m + (2.0/3.0)*p.f.x*dt/p.m - (1.0/12.0)*p.previous.f.x*dt/p.m; 
-			p.next.vy = p.vy + (5.0/12.0)*p.next.f.y*dt/p.m + (2.0/3.0)*p.f.y*dt/p.m - (1.0/12.0)*p.previous.f.y*dt/p.m;
-			if(Double.isNaN(p.next.vx) || Double.isNaN(p.next.vy)){
-				System.out.println("EN NEXT VY ( CORRECCION )");
-				System.out.println("f era: " + p.f.x + "," + p.f.y);
-				System.out.println("rx,ry: " + p.pred.rx + "," + p.pred.ry);
-				System.out.println("Predicted v: " + p.pred.vx + "," + p.pred.vy);
-				try{Thread.sleep(5000);}catch(Exception e){};
-			}
-			
-			p.previous.rx = p.rx;
-			p.previous.ry = p.ry;
-			p.previous.vx = p.vx;
-			p.previous.vy = p.vy;
-			p.previous.f = p.f;
-			
-			if(Double.isNaN(p.next.rx) || Double.isNaN(p.next.ry))
-				System.out.println("P.NEXT.R");
 			p.rx = p.next.rx;
 			p.ry = p.next.ry;
-			p.vx = p.next.vx;
-			p.vy = p.next.vy;
-			p.f = p.next.f;
 		}
 		/*System.out.println("EN beeman salgo, vx=" + p.vx + " - vy=" + p.vy);
 		try{Thread.sleep(1000);}catch(Exception e){};*/
@@ -198,10 +186,12 @@ public class Simulation {
 		for(Particle p: particles)
 			p.f = new Vector(0,-p.m * GRAVITY);
 		for(Particle p: particles){
-			p.checked = true;
-			for(Particle p2: particles){
-				if(!p.equals(p2) && !p2.checked){
-					p.collision(p2);
+			if(!p.checked){
+				p.checked = true;
+				for(Particle p2: particles){
+					if(!p.equals(p2) && !p2.checked){
+						p.collision(p2);
+					}
 				}
 			}
 		}
@@ -221,8 +211,10 @@ public class Simulation {
 			}
 		}*/
 		// Check wall Collision
-		for(Particle p: particles)
-			p.collisionWall(s.getW(), s.getL(), s.getD());
+		for(Particle p: particles){
+			if(p.ry>=-p.r)
+				p.collisionWall(s.getW(), s.getL(), s.getD());
+		}
 		/*if(p.f.y>0)
 			p.f.y*=0.9;*/
 	}
@@ -262,7 +254,17 @@ public class Simulation {
 	}
 	
 	public void clearMarks(Set<Particle> particles){
-		for(Particle p: particles)
-			p.checked = false;
+		Set<Particle> toBeRemoved = new HashSet<Particle>();
+		for(Particle p: particles){
+			if(p.ry>=-p.r){
+				p.checked = false;
+			}else if(p.ry<-s.getL()/2){
+				toBeRemoved.add(p);
+			}
+		}
+		for(Particle p: toBeRemoved){
+			particles.remove(p);
+		}
+		toBeRemoved.clear();
 	}
 }
